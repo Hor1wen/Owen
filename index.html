@@ -79,31 +79,72 @@
     </ul>
 
     <script>
-        document.getElementById('homeworkForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+        document.addEventListener('DOMContentLoaded', function() {
+            // โหลดข้อมูลจาก localStorage
+            loadHomework();
 
-            const subject = document.getElementById('subject').value;
-            const dueDate = document.getElementById('dueDate').value;
-            const details = document.getElementById('details').value;
+            document.getElementById('homeworkForm').addEventListener('submit', function(event) {
+                event.preventDefault();
 
-            const li = document.createElement('li');
-            li.textContent = `วิชา: ${subject}, วันครบกำหนด: ${new Date(dueDate).toLocaleString()}, รายละเอียด: ${details}`;
-            
-            const completeBtn = document.createElement('button');
-            completeBtn.textContent = 'ทำเสร็จแล้ว';
-            completeBtn.className = 'complete-btn';
-            completeBtn.onclick = function() {
-                li.remove();
-            };
+                const subject = document.getElementById('subject').value;
+                const dueDate = document.getElementById('dueDate').value;
+                const details = document.getElementById('details').value;
 
-            li.appendChild(completeBtn);
-            document.getElementById('homeworkList').appendChild(li);
+                // สร้างงานใหม่
+                const homework = {
+                    subject: subject,
+                    dueDate: dueDate,
+                    details: details
+                };
 
-            // ล้างค่าในฟอร์มหลังจากเพิ่มงานแล้ว
-            document.getElementById('subject').value = '';
-            document.getElementById('dueDate').value = '';
-            document.getElementById('details').value = '';
+                // เพิ่มงานใหม่ลงใน localStorage
+                saveHomework(homework);
+
+                // ล้างค่าในฟอร์มหลังจากเพิ่มงานแล้ว
+                document.getElementById('subject').value = '';
+                document.getElementById('dueDate').value = '';
+                document.getElementById('details').value = '';
+            });
         });
+
+        function saveHomework(homework) {
+            let homeworkList = JSON.parse(localStorage.getItem('homeworkList')) || [];
+            homeworkList.push(homework);
+            localStorage.setItem('homeworkList', JSON.stringify(homeworkList));
+            renderHomeworkList();
+        }
+
+        function loadHomework() {
+            renderHomeworkList();
+        }
+
+        function renderHomeworkList() {
+            const homeworkList = JSON.parse(localStorage.getItem('homeworkList')) || [];
+            const ul = document.getElementById('homeworkList');
+            ul.innerHTML = '';
+
+            homeworkList.forEach((homework, index) => {
+                const li = document.createElement('li');
+                li.textContent = `วิชา: ${homework.subject}, วันครบกำหนด: ${new Date(homework.dueDate).toLocaleString()}, รายละเอียด: ${homework.details}`;
+                
+                const completeBtn = document.createElement('button');
+                completeBtn.textContent = 'ทำเสร็จแล้ว';
+                completeBtn.className = 'complete-btn';
+                completeBtn.onclick = function() {
+                    deleteHomework(index);
+                };
+
+                li.appendChild(completeBtn);
+                ul.appendChild(li);
+            });
+        }
+
+        function deleteHomework(index) {
+            let homeworkList = JSON.parse(localStorage.getItem('homeworkList')) || [];
+            homeworkList.splice(index, 1);
+            localStorage.setItem('homeworkList', JSON.stringify(homeworkList));
+            renderHomeworkList();
+        }
     </script>
 </body>
 </html>
